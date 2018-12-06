@@ -19,16 +19,16 @@ func main() {
 	token := flag.String("t", "", "Bot Authorization Token")
 	flag.Parse()
 
-	dg, err := discordgo.New(fmt.Sprintf("Bot %v", token))
+	dg, err := discordgo.New(fmt.Sprintf("Bot %s", *token))
 	if err != nil {
 		log.Fatal("Error creationg Discord Session", err)
 	}
 
-	dg.AddHandlerOnce(waitForMessage)
+	dg.AddHandler(waitForMessage)
 
 	err = dg.Open()
 	if err != nil {
-		log.Fatal("error opening connection", err)
+		log.Fatal("error opening connection ", err)
 	}
 	fmt.Println("BotLion is now running.  Press CTRL-C to exit.")
 
@@ -41,6 +41,10 @@ func main() {
 }
 
 func waitForMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
+	go handleMessage(s, m)
+}
+
+func handleMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Author.ID == s.State.User.ID {
 		return
 	}
