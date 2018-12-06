@@ -1,4 +1,4 @@
-package poller
+package middleware
 
 import (
 	"github.com/bwmarrin/discordgo"

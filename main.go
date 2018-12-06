@@ -1,7 +1,7 @@
 package main
 
 import (
-	"BotLion/core"
+	"BotLion/middleware"
 	"flag"
 	"fmt"
 	"os"
@@ -24,7 +24,7 @@ func main() {
 		log.Fatal("Error creationg Discord Session", err)
 	}
 
-	dg.AddHandler(waitForMessage)
+	dg.AddHandler(waitForMessage(dg))
 
 	err = dg.Open()
 	if err != nil {
@@ -40,26 +40,13 @@ func main() {
 	dg.Close()
 }
 
-func waitForMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
-	go handleMessage(s, m)
-}
+func waitForMessage(s *discordgo.Session) func(s *discordgo.Session, m *discordgo.MessageCreate) {
+	finish := middleware.NewFinishMiddleware()
+	pongMiddleware := middleware.NewPongMiddleware(s, finish)
+	pingMiddleware := middleware.NewPingMiddleware(s, pongMiddleware)
+	ignoreBotMiddleware := middleware.NewIgnoreIfFromBotMiddleware(s, pingMiddleware)
 
-func handleMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
-
-	finish := core.FinishMiddleware{
-		S:    s,
-		Next: nil,
+	return func(s *discordgo.Session, m *discordgo.MessageCreate) {
+		ignoreBotMiddleware.Handle(m)
 	}
-
-	pingMiddleware := core.PingMiddleWare{
-		S:    s,
-		Next: finish,
-	}
-
-	ignoreBotMiddleware := core.IgnoreIfFromBotMiddleware{
-		S:    s,
-		Next: pingMiddleware,
-	}
-
-	ignoreBotMiddleware.Handle(m)
 }
