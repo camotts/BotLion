@@ -1,11 +1,11 @@
 package main
 
 import (
+	"BotLion/core"
 	"flag"
 	"fmt"
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
 	//move to more feature filled logging package
 	"log"
@@ -45,19 +45,21 @@ func waitForMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 }
 
 func handleMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
-	if m.Author.ID == s.State.User.ID {
-		return
-	}
-	msg := strings.ToLower(m.Content)
-	if strings.HasPrefix(msg, "ping") {
-		for i := 0; i < strings.Count(msg, "s")+1; i++ {
-			s.ChannelMessageSend(m.ChannelID, "Pong!")
-		}
+
+	finish := core.FinishMiddleware{
+		S:    s,
+		Next: nil,
 	}
 
-	if strings.HasPrefix(msg, "pong") {
-		for i := 0; i < strings.Count(msg, "s")+1; i++ {
-			s.ChannelMessageSend(m.ChannelID, "Ping!")
-		}
+	pingMiddleware := core.PingMiddleWare{
+		S:    s,
+		Next: finish,
 	}
+
+	ignoreBotMiddleware := core.IgnoreIfFromBotMiddleware{
+		S:    s,
+		Next: pingMiddleware,
+	}
+
+	ignoreBotMiddleware.Handle(m)
 }
