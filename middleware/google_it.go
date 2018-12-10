@@ -22,7 +22,7 @@ func (p googleItMiddleware) Handle(m *discordgo.MessageCreate) MessageMiddleware
 	if strings.HasPrefix(m.Content, "++google-it") {
 		p.s.ChannelMessageSend(m.ChannelID,
 			"Here's a super helpful link! <https://lmgtfy.com/?q="+
-				url.QueryEscape(strings.TrimPrefix(m.Content, "++google-it ")) +
+				url.QueryEscape(strings.TrimSpace(strings.TrimPrefix(m.Content, "++google-it"))) +
 					">")
 		return nil
 	}
