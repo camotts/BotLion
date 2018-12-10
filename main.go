@@ -46,7 +46,8 @@ func waitForMessage(s *discordgo.Session) func(s *discordgo.Session, m *discordg
 	pongMiddleware := middleware.NewPongMiddleware(s, finish)
 	pingMiddleware := middleware.NewPingMiddleware(s, pongMiddleware)
 	githubMiddleware := middleware.NewGithubMiddleware(s, pingMiddleware, "https://github.com/camotts/BotLion")
-	googleMiddleware := middleware.NewGoogleItMiddleware(s, githubMiddleware)
+	stackOverflowMiddleware := middleware.NewStackOverflowMiddleware(s, githubMiddleware)
+	googleMiddleware := middleware.NewGoogleItMiddleware(s, stackOverflowMiddleware)
 	ignoreBotMiddleware := middleware.NewIgnoreIfFromBotMiddleware(s, googleMiddleware)
 
 	return func(s *discordgo.Session, m *discordgo.MessageCreate) {
