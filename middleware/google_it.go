@@ -1,8 +1,9 @@
 package middleware
 
 import (
-	"strings"
 	"net/url"
+	"strings"
+
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -26,10 +27,9 @@ func (p googleItMiddleware) Handle(m *discordgo.MessageCreate) MessageMiddleware
 		}
 		p.s.ChannelMessageSend(m.ChannelID,
 			"Here's a super helpful link! <https://lmgtfy.com/?q="+
-				url.QueryEscape(strings.TrimSpace(strings.TrimPrefix(m.Content, "++google-it"))) +
-					">")
+				url.QueryEscape(strings.TrimSpace(strings.TrimPrefix(m.Content, "++google-it")))+
+				">")
 		return nil
 	}
-
 	return p.next.Handle(m)
 }
